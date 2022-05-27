@@ -95,6 +95,56 @@ class MenuController extends BaseController
      */
 
     public function getMenuItems() {
-        throw new \Exception('implement in coding task 3');
+        //throw new \Exception('implement in coding task 3');
+
+        $menus = MenuItem::get();
+//return $menus;
+        $child_events = [];
+
+        foreach($menus as $m){
+            if(empty($m->parent_id)){
+                if(!isset($child_events[0])){
+                    $child_events[0] = [];
+                }
+                $child_events[0][] = $m;
+            }else{
+                if(!isset($child_events[$m->parent_id])){
+                    $child_events[$m->parent_id] = [];
+                }
+                $child_events[$m->parent_id][]=$m;
+            }
+        }
+//return $child_events;
+//        foreach ($menus as $m){
+//            if(isset($child_events[$m->id]))
+//                $m->children = $child_events[$m->id];
+//            else
+//                $m->children = [];
+//
+//        }
+//
+//        return $menus;
+
+        //return $child_events;
+
+        foreach($child_events[0] as $m){
+            $this->arrangeChild($m, $child_events);
+        }
+
+        return $child_events[0];
+
+    }
+
+
+    private function arrangeChild($m, $child_events){
+        if(isset($child_events[$m->id])){
+            foreach($child_events[$m->id] as $m1){
+                $this->arrangeChild($m1, $child_events);
+            }
+            $m->children = $child_events[$m->id];
+        }else{
+            $m->children = [];
+        }
+
     }
 }
